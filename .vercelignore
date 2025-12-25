@@ -11,8 +11,4 @@ db/migrations
 scripts
 src
 src.old
-App.tsx
-index.tsx
-index.html
-vite.config.ts
 

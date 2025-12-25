@@ -26587,3 +26587,966 @@ No results found
 
 ---
 
+
+Checking generated route files and cleaning the build:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: .next/types/routes.d.ts</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "src/app" in ".next" • 0 matches</summary>
+
+Output mode: content
+
+
+_No matches found_
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue</summary>
+
+```bash
+Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue
+```
+</details>
+</tool-use>
+
+---
+
+Could not find file '.next/server/app-paths-manifest.json' in the workspace.
+
+---
+
+
+
+---
+
+
+Checking if the `src` directory is causing Next.js to look in the wrong place. Since it's old Vite code, we should remove or rename it. Checking what's in it first:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: src/pages/Dashboard.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: Test-Path src/app</summary>
+
+```bash
+Test-Path src/app
+```
+
+```
+False
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="list_dir">
+<details>
+            <summary>Tool use: **list_dir** • Listed directory, 0 results</summary>
+        
+No results found
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "export.*from" in "src" • 0 matches</summary>
+
+Output mode: content
+
+
+_No matches found_
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Next.js is resolving routes incorrectly due to the `src` directory. Moving it out of the project root to prevent this:
+
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: Move-Item -Path src -Destination src.old -Force</summary>
+
+```bash
+Move-Item -Path src -Destination src.old -Force
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: .vercelignore</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -11,4 +11,5 @@
+  scripts
+  src
++ src.old
+  App.tsx
+  index.tsx
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: tsconfig.json</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -24,5 +24,5 @@
+    },
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+-   "exclude": ["node_modules", "src"]
++   "exclude": ["node_modules", "src", "src.old"]
+  }
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git add -A</summary>
+
+```bash
+git add -A
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git commit -m "Move src directory to src.old to fix Next.js route resolution error"</summary>
+
+```bash
+git commit -m "Move src directory to src.old to fix Next.js route resolution error"
+```
+
+```
+[main ddf4548] Move src directory to src.old to fix Next.js route resolution error
+ 16 files changed, 604 insertions(+), 7 deletions(-)
+ rename {src =&gt; src.old}/components/AudioVisualizer.tsx (100%)
+ rename {src =&gt; src.old}/components/NavigatorInterface.tsx (100%)
+ rename {src =&gt; src.old}/components/OpportunityCard.tsx (100%)
+ rename {src =&gt; src.old}/data/mock.ts (100%)
+ rename {src =&gt; src.old}/hooks/useGeminiLive.ts (100%)
+ rename {src =&gt; src.old}/lib/audio-utils.ts (100%)
+ rename {src =&gt; src.old}/pages/Artifacts.tsx (100%)
+ rename {src =&gt; src.old}/pages/Dashboard.tsx (100%)
+ rename {src =&gt; src.old}/pages/Factory.tsx (100%)
+ rename {src =&gt; src.old}/pages/Hunter.tsx (100%)
+ rename {src =&gt; src.old}/pages/MissionControl.tsx (100%)
+ rename {src =&gt; src.old}/pages/Settings.tsx (100%)
+ rename {src =&gt; src.old}/types/index.ts (100%)
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git push origin main</summary>
+
+```bash
+git push origin main
+```
+
+```
+To https://github.com/JacobKayembekazadi/granthunter2.git
+   ffa3b0f..ddf4548  main -&gt; main
+
+```
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixed the issue.
+
+**Problem:** Next.js was detecting the `src` directory and trying to resolve routes from `src/app` instead of `app`, causing the error `Cannot find module '../../src/app/(auth)/login/page.js'`.
+
+**Solution:**
+1. Renamed `src` to `src.old` to prevent Next.js from scanning it
+2. Updated `.vercelignore` to exclude `src.old`
+3. Updated `tsconfig.json` to exclude `src.old`
+4. Committed and pushed the changes
+
+**What happened:**
+- The `src` directory contained old Vite code that's not used in the Next.js app
+- Next.js was trying to resolve routes from `src/app` during the build
+- By renaming it to `src.old`, Next.js will only look in the `app` directory
+
+The build should now succeed. Vercel will automatically trigger a new deployment, and it should complete successfully since Next.js will only resolve routes from the `app` directory.
+
+The `src.old` directory is preserved in case you need anything from it later, but it won't interfere with the Next.js build.
+
+---
+
+_**User (2025-12-24 21:05Z)**_
+
+Fix the build error in components/pages/Artifacts.tsx:
+
+"Type error: 'id' is specified more than once, so this usage will be overwritten."
+
+Search the newArt object for duplicate id fields or spreads that include id. Remove or rename the duplicate so the object only defines id once. Apply the fix.
+
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Reading `components/pages/Artifacts.tsx` to locate the duplicate `id` field:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/pages/Artifacts.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixing the duplicate `id` in `newArt`: `formData` may include `id`, which overwrites the explicit `id`. Excluding `id` from `formData` before spreading:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/pages/Artifacts.tsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 1
+
+```diff
+@@ -75,10 +75,12 @@
+        toast.success("Intel metadata revised");
+      } else {
++       // Exclude id from formData to avoid duplicate
++       const { id: _, ...formDataWithoutId } = formData;
+        const newArt: Artifact = {
+          id: &#96;ART-${Math.floor(Math.random() * 900) + 100}&#96;,
+          size: &#96;${(Math.random() * 5 + 0.1).toFixed(1)} MB&#96;,
+          date: dateStr,
+          oppName: selectedOpp?.title || 'Unknown',
+-         ...(formData as Artifact)
++         ...(formDataWithoutId as Omit&lt;Artifact, 'id'&gt;)
+        };
+        setArtifacts(prev =&gt; [newArt, ...prev]);
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `components/pages/Artifacts.tsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixed the duplicate `id` field. Committing and pushing the fix:
+
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git add components/pages/Artifacts.tsx</summary>
+
+```bash
+git add components/pages/Artifacts.tsx
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git commit -m "Fix duplicate id field in Artifacts.tsx newArt object"</summary>
+
+```bash
+git commit -m "Fix duplicate id field in Artifacts.tsx newArt object"
+```
+
+```
+[main d1ae8cb] Fix duplicate id field in Artifacts.tsx newArt object
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git push origin main</summary>
+
+```bash
+git push origin main
+```
+
+```
+To https://github.com/JacobKayembekazadi/granthunter2.git
+   ddf4548..d1ae8cb  main -&gt; main
+
+```
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixed the duplicate `id` field.
+
+**Problem:**
+The `newArt` object was setting `id` explicitly, then spreading `formData` which could also contain an `id`, causing a duplicate.
+
+**Solution:**
+Destructured `id` out of `formData` before spreading it, so `id` is only defined once (the generated one).
+
+**Changes:**
+- Destructured `{ id: _, ...formDataWithoutId }` to exclude `id` from `formData`
+- Spread `formDataWithoutId` instead of `formData` to avoid the duplicate
+
+The fix has been committed and pushed. The build should now succeed. Vercel will automatically trigger a new deployment with this fix.
+
+---
+
+_**User (2025-12-24 21:05Z)**_
+
+const { size, ...rest } = formDataWithoutId;
+
+const newArt: Artifact = {
+  id: `ART-${Math.floor(Math.random() * 900) + 100}`,
+  size: `${(Math.random() * 5 + 0.1).toFixed(1)} MB`,
+  date: dateStr,
+  oppName: selectedOpp?.title || 'Unknown',
+  ...rest
+};
+
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Updating the fix to also exclude `size` since we're setting it explicitly:
+
+
+---
+
+The string to replace was not found in the file.
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `components/pages/Artifacts.tsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git add components/pages/Artifacts.tsx</summary>
+
+```bash
+git add components/pages/Artifacts.tsx
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git commit -m "Also exclude size from formData to prevent duplicate in newArt object"</summary>
+
+```bash
+git commit -m "Also exclude size from formData to prevent duplicate in newArt object"
+```
+
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	modified:   .specstory/history/2025-12-24_18-23Z-project-replacement-from-git-repository.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git push origin main</summary>
+
+```bash
+git push origin main
+```
+
+```
+Everything up-to-date
+
+```
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Reading the file to get the exact content:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/pages/Artifacts.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Applying the fix:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/pages/Artifacts.tsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 3
+
+```diff
+@@ -75,12 +75,12 @@
+        toast.success("Intel metadata revised");
+      } else {
+-       // Exclude id from formData to avoid duplicate
+-       const { id: _, ...formDataWithoutId } = formData;
++       // Exclude id and size from formData to avoid duplicates (we generate these)
++       const { id: _, size: __, ...rest } = formData;
+        const newArt: Artifact = {
+          id: &#96;ART-${Math.floor(Math.random() * 900) + 100}&#96;,
+          size: &#96;${(Math.random() * 5 + 0.1).toFixed(1)} MB&#96;,
+          date: dateStr,
+          oppName: selectedOpp?.title || 'Unknown',
+-         ...(formDataWithoutId as Omit&lt;Artifact, 'id'&gt;)
++         ...rest
+        };
+        setArtifacts(prev =&gt; [newArt, ...prev]);
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `components/pages/Artifacts.tsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git add components/pages/Artifacts.tsx</summary>
+
+```bash
+git add components/pages/Artifacts.tsx
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git commit -m "Also exclude size from formData to prevent duplicate in newArt object"</summary>
+
+```bash
+git commit -m "Also exclude size from formData to prevent duplicate in newArt object"
+```
+
+```
+[main 67355dc] Also exclude size from formData to prevent duplicate in newArt object
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git push origin main</summary>
+
+```bash
+git push origin main
+```
+
+```
+To https://github.com/JacobKayembekazadi/granthunter2.git
+   d1ae8cb..67355dc  main -&gt; main
+
+```
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Applied the fix. Excluding both `id` and `size` from `formData` since both are set explicitly in `newArt`:
+
+- `id` is generated: `ART-${random number}`
+- `size` is generated: `${random} MB`
+
+This prevents duplicates and ensures the generated values are used. The fix has been committed and pushed. The build should now succeed.
+
+---
+
+_**User (2025-12-24 21:05Z)**_
+
+40 
+Type error: Type '{ name?: string | undefined; type?: "pdf" | "docx" | "pptx" | "xlsx" | "txt" | undefined; status?: "ready" | "processing" | undefined; opportunityId?: string | undefined; date: string; oppName: string; id: string; size: string; }' is not assignable to type 'Artifact'.
+22:58:17.840 
+  Types of property 'name' are incompatible.
+22:58:17.840 
+    Type 'string | undefined' is not assignable to type 'string'.
+22:58:17.841 
+      Type 'undefined' is not assignable to type 'string'.
+22:58:17.841 
+22:58:17.841 
+  77 |       // Exclude id and size from formData to avoid duplicates (we generate these)
+22:58:17.841 
+  78 |       const { id: _, size: __, ...rest } = formData;
+22:58:17.841 
+> 79 |       const newArt: Artifact = {
+22:58:17.841 
+     |             ^
+22:58:17.841 
+  80 |         id: `ART-${Math.floor(Math.random() * 900) + 100}`,
+22:58:17.841 
+  81 |         size: `${(Math.random() * 5 + 0.1).toFixed(1)} MB`,
+22:58:17.841 
+  82 |         date: dateStr,
+22:58:17.870 
+Next.js build worker exited with code: 1 and signal: null
+22:58:17.891 
+Error: Command "npm run build" exited with 1
+
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+The `rest` object may have optional fields, but `Artifact` requires `name` (and possibly others). Checking the `Artifact` type and fixing the type issue:
+
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "type Artifact|interface Artifact" in "." • 2 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `.\types\index.ts` | `export interface Artifact \{` | L13 |
+| `.\src.old\types\index.ts` | `export interface Artifact \{` | L13 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: types/index.ts</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/pages/Artifacts.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixing the type issue: `rest` has optional fields, but `Artifact` requires them. Ensuring all required fields are present and properly typed:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/pages/Artifacts.tsx</summary>
+
+**Chunk 1**
+Lines added: 5, lines removed: 2
+
+```diff
+@@ -76,11 +76,14 @@
+      } else {
+        // Exclude id and size from formData to avoid duplicates (we generate these)
+-       const { id: _, size: __, ...rest } = formData;
++       // Ensure all required fields are present (we already checked name exists)
+        const newArt: Artifact = {
+          id: &#96;ART-${Math.floor(Math.random() * 900) + 100}&#96;,
++         name: formData.name,
++         type: formData.type || 'pdf',
++         status: formData.status || 'ready',
++         opportunityId: formData.opportunityId || '',
+          size: &#96;${(Math.random() * 5 + 0.1).toFixed(1)} MB&#96;,
+          date: dateStr,
+          oppName: selectedOpp?.title || 'Unknown',
+-         ...rest
+        };
+        setArtifacts(prev =&gt; [newArt, ...prev]);
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `components/pages/Artifacts.tsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git add components/pages/Artifacts.tsx</summary>
+
+```bash
+git add components/pages/Artifacts.tsx
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git commit -m "Fix type error: explicitly set all required Artifact fields instead of spreading optional formData"</summary>
+
+```bash
+git commit -m "Fix type error: explicitly set all required Artifact fields instead of spreading optional formData"
+```
+
+```
+[main 7c1c26e] Fix type error: explicitly set all required Artifact fields instead of spreading optional formData
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git push origin main</summary>
+
+```bash
+git push origin main
+```
+
+```
+To https://github.com/JacobKayembekazadi/granthunter2.git
+   67355dc..7c1c26e  main -&gt; main
+
+```
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixed the type error. The issue was that `formData` has optional fields (`Partial<Artifact>`), but `Artifact` requires all fields to be non-optional.
+
+**Solution:**
+Instead of spreading `rest` (which has optional fields), I explicitly set all required `Artifact` fields:
+- `name`: from `formData.name` (already validated)
+- `type`: from `formData.type` with fallback to `'pdf'`
+- `status`: from `formData.status` with fallback to `'ready'`
+- `opportunityId`: from `formData.opportunityId` with fallback to `''`
+- `id`, `size`, `date`, `oppName`: generated/set explicitly
+
+This ensures TypeScript knows all required fields are present and properly typed. The fix has been committed and pushed. The build should now succeed.
+
+---
+
+_**User (2025-12-24 21:05Z)**_
+
+Fix the type error in Artifacts.tsx where newArt fails to satisfy the Artifact type. Remove the spread of optional fields and explicitly assign all required Artifact properties with safe fallback values. Ensure name, type, status, and opportunityId are always defined strings. Apply the fix.
+
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Checking the current state of the file to ensure the fix is correct:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/pages/Artifacts.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: types/index.ts</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Improving the fix to ensure all required fields are properly typed and non-optional:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/pages/Artifacts.tsx</summary>
+
+**Chunk 1**
+Lines added: 5, lines removed: 5
+
+```diff
+@@ -75,11 +75,11 @@
+        toast.success("Intel metadata revised");
+      } else {
+-       // Exclude id and size from formData to avoid duplicates (we generate these)
+-       // Ensure all required fields are present (we already checked name exists)
++       // Explicitly assign all required Artifact properties with safe fallback values
++       // No spreading of optional fields to ensure type safety
+        const newArt: Artifact = {
+          id: &#96;ART-${Math.floor(Math.random() * 900) + 100}&#96;,
+-         name: formData.name,
+-         type: formData.type || 'pdf',
+-         status: formData.status || 'ready',
++         name: formData.name as string, // Already validated above
++         type: (formData.type || 'pdf') as 'pdf' | 'docx' | 'pptx' | 'xlsx' | 'txt',
++         status: (formData.status || 'ready') as 'ready' | 'processing',
+          opportunityId: formData.opportunityId || '',
+          size: &#96;${(Math.random() * 5 + 0.1).toFixed(1)} MB&#96;,
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `components/pages/Artifacts.tsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: npm run build 2>&1 | Select-String -Pattern "Artifacts|error|Error" | Select-Object -First 10</summary>
+
+```bash
+npm run build 2>&1 | Select-String -Pattern "Artifacts|error|Error" | Select-Object -First 10
+```
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
