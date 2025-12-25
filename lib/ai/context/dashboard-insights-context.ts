@@ -40,8 +40,8 @@ export async function buildDashboardInsightsContext(
 
   // Get high match opportunities
   const highMatch = insightsData.opportunities
-    .filter(o => o.matchScore > 80)
-    .map(o => ({ id: o.id, matchScore: o.matchScore }));
+    .filter(o => o.matchScore !== null && o.matchScore > 80)
+    .map(o => ({ id: o.id, matchScore: o.matchScore || 0 }));
 
   // Get upcoming deadlines (next 7 days)
   const now = new Date();

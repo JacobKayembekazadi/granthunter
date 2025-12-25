@@ -94,16 +94,40 @@ export async function GET(request: NextRequest) {
     }
 
     // Apply sorting
-    const sortField = opportunities[sortBy as keyof typeof opportunities];
-    if (sortField) {
-      if (sortOrder === 'desc') {
-        query = query.orderBy(desc(sortField)) as any;
-      } else {
-        query = query.orderBy(asc(sortField)) as any;
+    if (sortOrder === 'desc') {
+      switch (sortBy) {
+        case 'matchScore':
+          query = query.orderBy(desc(opportunities.matchScore)) as any;
+          break;
+        case 'dueDate':
+          query = query.orderBy(desc(opportunities.dueDate)) as any;
+          break;
+        case 'value':
+          query = query.orderBy(desc(opportunities.value)) as any;
+          break;
+        case 'updatedAt':
+          query = query.orderBy(desc(opportunities.updatedAt)) as any;
+          break;
+        default:
+          query = query.orderBy(desc(opportunities.createdAt)) as any;
       }
     } else {
-      // Default sort
-      query = query.orderBy(desc(opportunities.createdAt)) as any;
+      switch (sortBy) {
+        case 'matchScore':
+          query = query.orderBy(asc(opportunities.matchScore)) as any;
+          break;
+        case 'dueDate':
+          query = query.orderBy(asc(opportunities.dueDate)) as any;
+          break;
+        case 'value':
+          query = query.orderBy(asc(opportunities.value)) as any;
+          break;
+        case 'updatedAt':
+          query = query.orderBy(asc(opportunities.updatedAt)) as any;
+          break;
+        default:
+          query = query.orderBy(asc(opportunities.createdAt)) as any;
+      }
     }
 
     // Apply pagination

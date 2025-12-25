@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getOpportunityWithRelations } from '@/lib/db/dashboard-queries';
+import { db } from '@/db';
+import { opportunities } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export async function GET(
   request: NextRequest,
