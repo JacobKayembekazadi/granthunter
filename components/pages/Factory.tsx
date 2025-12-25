@@ -145,11 +145,19 @@ const Factory: React.FC = () => {
       setJobs(prev => prev.map(j => j.id === editingJob.id ? { ...j, ...formData } as Job : j));
       toast.success("Project settings updated.");
     } else {
+      // Remove id from formData before spreading to avoid duplicate
+      const { id: _ignored, ...rest } = formData as Job;
       const newJob: Job = {
         id: `PRJ-${Math.floor(Math.random() * 9000) + 1000}`,
         eta: '10m',
-        logs: [{ timestamp: new Date().toLocaleTimeString([], { hour12: false }), message: 'Project started.', type: 'info' }],
-        ...(formData as Job)
+        logs: [
+          {
+            timestamp: new Date().toLocaleTimeString([], { hour12: false }),
+            message: 'Project started.',
+            type: 'info'
+          }
+        ],
+        ...rest
       };
       setJobs(prev => [newJob, ...prev]);
       toast.success("New proposal project started.");
