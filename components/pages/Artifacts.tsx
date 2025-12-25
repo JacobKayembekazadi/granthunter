@@ -74,14 +74,14 @@ const Artifacts: React.FC = () => {
       } as Artifact : a));
       toast.success("Intel metadata revised");
     } else {
-      // Exclude id from formData to avoid duplicate
-      const { id: _, ...formDataWithoutId } = formData;
+      // Exclude id and size from formData to avoid duplicates (we generate these)
+      const { id: _, size: __, ...rest } = formData;
       const newArt: Artifact = {
         id: `ART-${Math.floor(Math.random() * 900) + 100}`,
         size: `${(Math.random() * 5 + 0.1).toFixed(1)} MB`,
         date: dateStr,
         oppName: selectedOpp?.title || 'Unknown',
-        ...(formDataWithoutId as Omit<Artifact, 'id'>)
+        ...rest
       };
       setArtifacts(prev => [newArt, ...prev]);
       toast.success("New artifact indexed to repository");
