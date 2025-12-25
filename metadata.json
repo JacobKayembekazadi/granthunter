@@ -1,5 +1,7 @@
 {
-  "name": "The Sloe Audit Protocol",
-  "description": "A specialized AI filter designed to separate high-value software/AI government contract opportunities from physical hardware/construction noise.",
-  "requestFramePermissions": []
+  "name": "GrantHunter",
+  "description": "Autonomous Government Contracting AI System utilizing Gemini Live for real-time voice qualification and automated proposal generation.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }
