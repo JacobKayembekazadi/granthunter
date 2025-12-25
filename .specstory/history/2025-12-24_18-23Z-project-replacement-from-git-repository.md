@@ -25255,111 +25255,735 @@ Updating all route handlers to await `params`:
 
 <details><summary>Tool use: **search_replace** • Edit file: app/api/agents/[id]/route.ts</summary>
 
-Status: **loading**
+**Chunk 1**
+Lines added: 2, lines removed: 1
 
-```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { db } from '@/db';
-import { searchAgents } from '@/db/schema';
-import { eq } from 'drizzle-orm';
-import { inngest } from '@/inngest/client';
+```diff
+@@ -8,7 +8,8 @@
+  export async function GET(
+    request: NextRequest,
+-   { params }: { params: { id: string } }
++   { params }: { params: Promise&lt;{ id: string }&gt; }
+  ) {
+    try {
++     const { id } = await params;
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+```
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+**Chunk 2**
+Lines added: 1, lines removed: 1
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const [agent] = await db
-      .select()
-      .from(searchAgents)
-      .where(eq(searchAgents.id, id))
-      .limit(1);
-
-    if (!agent) {
-      return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({ agent });
-  } catch (error) {
-    console.error('Error fetching agent:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-}
-
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const updates: Partial<typeof searchAgents.$inferInsert> = {};
-
-    if (body.name) updates.name = body.name;
-    if (body.target) updates.target = body.target;
-    if (body.status) updates.status = body.status;
-
-    const [agent] = await db
-      .update(searchAgents)
-      .set(updates)
-      .where(eq(searchAgents.id, params.id))
-      .returning();
-
-    if (!agent) {
-      return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({ agent });
-  } catch (error) {
-    console.error('Error updating agent:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-}
-
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    await db
-      .delete(searchAgents)
-      .where(eq(searchAgents.id, params.id));
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting agent:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-}
-
-
+```diff
+@@ -21,5 +22,5 @@
+        .select()
+        .from(searchAgents)
+-       .where(eq(searchAgents.id, params.id))
++       .where(eq(searchAgents.id, id))
+        .limit(1);
+  
 ```
 
 </details>
 
 </tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: app/api/agents/[id]/route.ts</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -38,7 +38,8 @@
+  export async function PATCH(
+    request: NextRequest,
+-   { params }: { params: { id: string } }
++   { params }: { params: Promise&lt;{ id: string }&gt; }
+  ) {
+    try {
++     const { id } = await params;
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+```
+
+**Chunk 2**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -58,5 +59,5 @@
+        .update(searchAgents)
+        .set(updates)
+-       .where(eq(searchAgents.id, params.id))
++       .where(eq(searchAgents.id, id))
+        .returning();
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: app/api/agents/[id]/route.ts</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -75,7 +75,8 @@
+  export async function DELETE(
+    request: NextRequest,
+-   { params }: { params: { id: string } }
++   { params }: { params: Promise&lt;{ id: string }&gt; }
+  ) {
+    try {
++     const { id } = await params;
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+```
+
+**Chunk 2**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -87,5 +88,5 @@
+      await db
+        .delete(searchAgents)
+-       .where(eq(searchAgents.id, params.id));
++       .where(eq(searchAgents.id, id));
+  
+      return NextResponse.json({ success: true });
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: app/api/agents/[id]/scan/route.ts</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -5,7 +5,8 @@
+  export async function POST(
+    request: NextRequest,
+-   { params }: { params: { id: string } }
++   { params }: { params: Promise&lt;{ id: string }&gt; }
+  ) {
+    try {
++     const { id } = await params;
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+```
+
+**Chunk 2**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -18,5 +19,5 @@
+      await inngest.send({
+        name: 'agent/scan',
+-       data: { agentId: params.id },
++       data: { agentId: id },
+      });
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: app/api/opportunities/[id]/route.ts</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -7,7 +7,8 @@
+  export async function GET(
+    request: NextRequest,
+-   { params }: { params: { id: string } }
++   { params }: { params: Promise&lt;{ id: string }&gt; }
+  ) {
+    try {
++     const { id } = await params;
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+```
+
+**Chunk 2**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -20,5 +21,5 @@
+        .select()
+        .from(opportunities)
+-       .where(eq(opportunities.id, params.id))
++       .where(eq(opportunities.id, id))
+        .limit(1);
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: app/api/opportunities/[id]/route.ts</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -37,7 +37,8 @@
+  export async function PATCH(
+    request: NextRequest,
+-   { params }: { params: { id: string } }
++   { params }: { params: Promise&lt;{ id: string }&gt; }
+  ) {
+    try {
++     const { id } = await params;
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+```
+
+**Chunk 2**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -61,5 +62,5 @@
+        .update(opportunities)
+        .set(updates)
+-       .where(eq(opportunities.id, params.id))
++       .where(eq(opportunities.id, id))
+        .returning();
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: app/api/opportunities/[id]/route.ts</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -78,7 +78,8 @@
+  export async function DELETE(
+    request: NextRequest,
+-   { params }: { params: { id: string } }
++   { params }: { params: Promise&lt;{ id: string }&gt; }
+  ) {
+    try {
++     const { id } = await params;
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+```
+
+**Chunk 2**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -90,5 +91,5 @@
+      await db
+        .delete(opportunities)
+-       .where(eq(opportunities.id, params.id));
++       .where(eq(opportunities.id, id));
+  
+      return NextResponse.json({ success: true });
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: app/api/proposals/[id]/route.ts</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -7,7 +7,8 @@
+  export async function GET(
+    request: NextRequest,
+-   { params }: { params: { id: string } }
++   { params }: { params: Promise&lt;{ id: string }&gt; }
+  ) {
+    try {
++     const { id } = await params;
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+```
+
+**Chunk 2**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -20,5 +21,5 @@
+        .select()
+        .from(proposals)
+-       .where(eq(proposals.id, params.id))
++       .where(eq(proposals.id, id))
+        .limit(1);
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: app/api/proposals/[id]/status/route.ts</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -7,7 +7,8 @@
+  export async function GET(
+    request: NextRequest,
+-   { params }: { params: { id: string } }
++   { params }: { params: Promise&lt;{ id: string }&gt; }
+  ) {
+    try {
++     const { id } = await params;
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+```
+
+**Chunk 2**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -20,5 +21,5 @@
+        .select()
+        .from(proposals)
+-       .where(eq(proposals.id, params.id))
++       .where(eq(proposals.id, id))
+        .limit(1);
+  
+```
+
+**Chunk 3**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -30,5 +31,5 @@
+        .select()
+        .from(jobLogs)
+-       .where(eq(jobLogs.proposalId, params.id))
++       .where(eq(jobLogs.proposalId, id))
+        .orderBy(jobLogs.timestamp);
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: app/api/proposals/[id]/generate-document/route.ts</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -7,7 +7,8 @@
+  export async function POST(
+    request: NextRequest,
+-   { params }: { params: { id: string } }
++   { params }: { params: Promise&lt;{ id: string }&gt; }
+  ) {
+    try {
++     const { id } = await params;
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+```
+
+**Chunk 2**
+Lines added: 2, lines removed: 2
+
+```diff
+@@ -25,9 +26,9 @@
+  
+      if (format === 'pdf') {
+-       buffer = await generatePDF(params.id);
++       buffer = await generatePDF(id);
+        mimeType = 'application/pdf';
+        extension = 'pdf';
+      } else {
+-       buffer = await generateDOCX(params.id);
++       buffer = await generateDOCX(id);
+        mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        extension = 'docx';
+```
+
+**Chunk 3**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -36,5 +37,5 @@
+      // Upload to Supabase Storage
+      const supabaseClient = createSupabaseClient();
+-     const fileName = &#96;proposal-${params.id}-${Date.now()}.${extension}&#96;;
++     const fileName = &#96;proposal-${id}-${Date.now()}.${extension}&#96;;
+      const { data: uploadData, error: uploadError } = await supabaseClient.storage
+        .from('proposals')
+```
+
+</details>
+
+</tool-use>
+
+---
+
+
+
+---
+
+
+Checking for lint errors:
+
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `app/api`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixed all route handlers. In Next.js 15, `params` is a Promise and must be awaited.
+
+## What I Fixed:
+
+Updated all route handlers that use dynamic `[id]` params:
+
+1. `app/api/agents/[id]/insights/route.ts`
+2. `app/api/agents/[id]/route.ts` (GET, PATCH, DELETE)
+3. `app/api/agents/[id]/scan/route.ts`
+4. `app/api/opportunities/[id]/route.ts` (GET, PATCH, DELETE)
+5. `app/api/proposals/[id]/route.ts`
+6. `app/api/proposals/[id]/status/route.ts`
+7. `app/api/proposals/[id]/generate-document/route.ts`
+
+**Changed from:**
+```typescript
+{ params }: { params: { id: string } }
+// Then using: params.id
+```
+
+**Changed to:**
+```typescript
+{ params }: { params: Promise<{ id: string }> }
+// Then: const { id } = await params;
+// Then using: id
+```
+
+The build should now succeed. Commit and push these changes, and Vercel will automatically redeploy:
+
+```bash
+git add .
+git commit -m "Fix Next.js 15 async params in route handlers"
+git push origin main
+```
+
+Or if you've already connected the repo, Vercel will automatically deploy on push. The build should pass now.
+
+---
+
+_**User (2025-12-24 21:05Z)**_
+
+commit && push
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Committing and pushing the fixes:
+
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git add -A</summary>
+
+```bash
+git add -A
+```
+
+```
+warning: in the working copy of 'scripts/deploy-vercel.sh', LF will be replaced by CRLF the next time Git touches it
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git commit -m "Fix Next.js 15 async params in route handlers - update all dynamic route handlers to await params Promise"</summary>
+
+```bash
+git commit -m "Fix Next.js 15 async params in route handlers - update all dynamic route handlers to await params Promise"
+```
+
+```
+[main 04b4521] Fix Next.js 15 async params in route handlers - update all dynamic route handlers to await params Promise
+ 17 files changed, 3832 insertions(+), 27 deletions(-)
+ create mode 100644 .vercelignore
+ create mode 100644 DEPLOYMENT_STATUS.md
+ create mode 100644 EDGE_VS_SERVERLESS.md
+ create mode 100644 VERCEL_DEPLOYMENT.md
+ create mode 100644 VERCEL_SETUP_STEPS.md
+ create mode 100644 scripts/deploy-vercel.sh
+ create mode 100644 scripts/set-vercel-env.ps1
+ create mode 100644 vercel.json
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: git push origin main</summary>
+
+```bash
+git push origin main
+```
+
+```
+To https://github.com/JacobKayembekazadi/granthunter2.git
+   d2ac60b..04b4521  main -&gt; main
+
+```
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Changes committed and pushed.
+
+**Commit:** `04b4521` - "Fix Next.js 15 async params in route handlers"
+
+**Files changed:** 17 files
+- Fixed all dynamic route handlers to use async params
+- Added Vercel configuration files
+- Added deployment documentation
+
+Since your GitHub repository is connected to Vercel, this push should trigger an automatic deployment.
+
+**Next steps:**
+1. Wait a few seconds for Vercel to detect the push
+2. Check deployment status: https://vercel.com/jacobkayembekazadi-gmailcoms-projects/granthunter/deployments
+3. The build should now succeed since we fixed the TypeScript errors
+
+The build should pass now. Once it completes, your app will be live at:
+- **Production URL:** https://granthunter-jacobkayembekazadi-gmailcoms-projects.vercel.app
+
+Make sure you've added the environment variables in the Vercel dashboard for the app to work properly.
+
+Should I check the deployment status in a moment?
+
+---
+
+_**User (2025-12-24 21:05Z)**_
+
+22:37:41.242 Running build in Washington, D.C., USA (East) – iad1
+22:37:41.243 Build machine configuration: 2 cores, 8 GB
+22:37:41.373 Cloning github.com/JacobKayembekazadi/granthunter2 (Branch: main, Commit: 04b4521)
+22:37:41.374 Previous build caches not available.
+22:37:41.601 Cloning completed: 227.000ms
+22:37:41.642 Found .vercelignore
+22:37:41.655 Removed 56 ignored files defined in .vercelignore
+22:37:41.655   /.git/config
+22:37:41.656   /.git/description
+22:37:41.656   /.git/FETCH_HEAD
+22:37:41.656   /.git/HEAD
+22:37:41.656   /.git/hooks/applypatch-msg.sample
+22:37:41.656   /.git/hooks/commit-msg.sample
+22:37:41.656   /.git/hooks/fsmonitor-watchman.sample
+22:37:41.656   /.git/hooks/post-update.sample
+22:37:41.656   /.git/hooks/pre-applypatch.sample
+22:37:41.656   /.git/hooks/pre-commit.sample
+22:37:42.075 Running "vercel build"
+22:37:42.563 Vercel CLI 50.1.3
+22:37:42.909 Running "install" command: `npm install`...
+22:37:46.451 npm warn deprecated serialize-error-cjs@0.1.4: Rolling release, please update to 0.2.0
+22:37:46.895 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+22:37:48.960 npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+22:37:49.033 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+22:37:49.067 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+22:37:49.201 npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+22:37:49.288 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+22:37:49.328 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+22:37:49.416 npm warn deprecated glob@8.1.0: Glob versions prior to v9 are no longer supported
+22:37:49.738 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+22:37:54.681 npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+22:38:02.596 
+22:38:02.597 added 710 packages, and audited 711 packages in 19s
+22:38:02.597 
+22:38:02.598 179 packages are looking for funding
+22:38:02.598   run `npm fund` for details
+22:38:02.618 
+22:38:02.619 6 vulnerabilities (2 low, 4 moderate)
+22:38:02.619 
+22:38:02.619 To address all issues (including breaking changes), run:
+22:38:02.619   npm audit fix --force
+22:38:02.619 
+22:38:02.619 Run `npm audit` for details.
+22:38:02.796 Detected Next.js version: 15.5.9
+22:38:02.797 Running "npm run build"
+22:38:03.164 
+22:38:03.164 > granthunter@0.0.0 build
+22:38:03.164 > next build
+22:38:03.165 
+22:38:04.706 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+22:38:04.707 This information is used to shape Next.js' roadmap and prioritize features.
+22:38:04.708 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+22:38:04.709 https://nextjs.org/telemetry
+22:38:04.710 
+22:38:04.791    ▲ Next.js 15.5.9
+22:38:04.793    - Experiments (use with caution):
+22:38:04.793      · serverActions
+22:38:04.793 
+22:38:04.830    Creating an optimized production build ...
+22:38:29.050  ✓ Compiled successfully in 21.8s
+22:38:29.053    Linting and checking validity of types ...
+22:38:36.019 Failed to compile.
+22:38:36.019 
+22:38:36.020 Type error: Cannot find module '../../src/app/(auth)/login/page.js' or its corresponding type declarations.
+22:38:36.020 
+22:38:36.049 Next.js build worker exited with code: 1 and signal: null
+22:38:36.069 Error: Command "npm run build" exited with 1
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+
+---
+
+<tool-use data-tool-type="unknown" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep**</summary>
+
+Status: **loading**
+
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+
+---
+
+
+
+---
+
+
+
+---
+
+
+
+---
+
+<tool-use data-tool-type="unknown" data-tool-name="read_file">
+<details>
+<summary>Tool use: **read_file**</summary>
+
+Status: **loading**
+
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+
+---
+
+
 
 ---
 

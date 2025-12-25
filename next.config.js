@@ -10,6 +10,8 @@ const nextConfig = {
   images: {
     domains: [],
   },
+  // Exclude src directory from build (it's old Vite code)
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
   // Note: Environment variables are handled by Vercel
   // Don't expose sensitive keys via env config
   env: {

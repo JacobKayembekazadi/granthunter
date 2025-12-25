@@ -9,4 +9,9 @@ node_modules
 !README.md
 db/migrations
 scripts
+src
+App.tsx
+index.tsx
+index.html
+vite.config.ts
 
