@@ -147,10 +147,10 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json({ stats });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching dashboard stats:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', message: error?.message || 'Unknown error' },
       { status: 500 }
     );
   }

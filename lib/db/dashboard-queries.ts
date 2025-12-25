@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { opportunities, proposals, searchAgents, agentRuns, users, pastPerformance, artifacts } from '@/db/schema';
-import { eq, and, gte, lte, sql, count, desc } from 'drizzle-orm';
+import { eq, and, gte, lte, sql, count, desc, asc } from 'drizzle-orm';
 import { OpportunityFilters, OpportunitySort } from '@/types/dashboard';
 
 export async function getDashboardStats(userId: string, organizationId?: string) {
@@ -140,12 +140,39 @@ export async function getOpportunitiesWithFilters(
   let query = db.select().from(opportunities).where(whereClause);
 
   // Apply sorting
-  const sortField = opportunities[sort.sortBy];
-  if (sortField) {
-    if (sort.sortOrder === 'desc') {
-      query = query.orderBy(desc(sortField)) as any;
-    } else {
-      query = query.orderBy(sortField) as any;
+  if (sort.sortOrder === 'desc') {
+    switch (sort.sortBy) {
+      case 'matchScore':
+        query = query.orderBy(desc(opportunities.matchScore)) as any;
+        break;
+      case 'dueDate':
+        query = query.orderBy(desc(opportunities.dueDate)) as any;
+        break;
+      case 'value':
+        query = query.orderBy(desc(opportunities.value)) as any;
+        break;
+      case 'updatedAt':
+        query = query.orderBy(desc(opportunities.updatedAt)) as any;
+        break;
+      default:
+        query = query.orderBy(desc(opportunities.createdAt)) as any;
+    }
+  } else {
+    switch (sort.sortBy) {
+      case 'matchScore':
+        query = query.orderBy(asc(opportunities.matchScore)) as any;
+        break;
+      case 'dueDate':
+        query = query.orderBy(asc(opportunities.dueDate)) as any;
+        break;
+      case 'value':
+        query = query.orderBy(asc(opportunities.value)) as any;
+        break;
+      case 'updatedAt':
+        query = query.orderBy(asc(opportunities.updatedAt)) as any;
+        break;
+      default:
+        query = query.orderBy(asc(opportunities.createdAt)) as any;
     }
   }
 
