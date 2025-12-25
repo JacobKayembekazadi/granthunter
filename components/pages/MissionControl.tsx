@@ -48,11 +48,46 @@ const MissionControl: React.FC = () => {
   };
 
   const handleSave = () => {
+    // Validate required fields
+    if (!formData.title || !formData.agency) {
+      toast.error("Title and agency are required");
+      return;
+    }
+
     if (editingOpp) {
-      setOpportunities(prev => prev.map(o => o.id === editingOpp.id ? { ...o, ...formData } as Opportunity : o));
+      // Explicitly construct updated opportunity with all required fields
+      setOpportunities(prev => prev.map(o => {
+        if (o.id === editingOpp.id) {
+          const updated: Opportunity = {
+            id: o.id, // Preserve existing id
+            title: formData.title ?? o.title,
+            agency: formData.agency ?? o.agency,
+            value: formData.value ?? o.value,
+            dueDate: formData.dueDate ?? o.dueDate,
+            status: formData.status ?? o.status,
+            matchScore: formData.matchScore ?? o.matchScore,
+            naicsCode: formData.naicsCode ?? o.naicsCode,
+            description: formData.description ?? o.description,
+          };
+          return updated;
+        }
+        return o;
+      }));
       toast.success("Opportunity updated.");
     } else {
-      setOpportunities(prev => [{ id: Math.random().toString(36).substr(2, 9), ...(formData as Opportunity) }, ...prev]);
+      // Explicitly construct new opportunity with all required fields
+      const newOpp: Opportunity = {
+        id: Math.random().toString(36).substr(2, 9),
+        title: formData.title ?? '',
+        agency: formData.agency ?? '',
+        value: formData.value ?? '',
+        dueDate: formData.dueDate ?? new Date().toISOString().split('T')[0],
+        status: formData.status ?? 'new',
+        matchScore: formData.matchScore ?? 85,
+        naicsCode: formData.naicsCode ?? '',
+        description: formData.description ?? '',
+      };
+      setOpportunities(prev => [newOpp, ...prev]);
       toast.success("New opportunity added.");
     }
     setIsModalOpen(false);

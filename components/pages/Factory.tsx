@@ -142,14 +142,39 @@ const Factory: React.FC = () => {
     }
 
     if (editingJob) {
-      setJobs(prev => prev.map(j => j.id === editingJob.id ? { ...j, ...formData } as Job : j));
+      // Explicitly construct updated job with all required fields
+      setJobs(prev => prev.map(j => {
+        if (j.id === editingJob.id) {
+          const updated: Job = {
+            id: j.id, // Preserve existing id
+            name: formData.name ?? j.name,
+            type: formData.type ?? j.type,
+            stage: formData.stage ?? j.stage,
+            progress: formData.progress ?? j.progress,
+            status: formData.status ?? j.status,
+            eta: formData.eta ?? j.eta,
+            priority: formData.priority ?? j.priority,
+            opportunityId: formData.opportunityId ?? j.opportunityId,
+            logs: formData.logs ?? j.logs,
+            configuration: formData.configuration ?? j.configuration,
+          };
+          return updated;
+        }
+        return j;
+      }));
       toast.success("Project settings updated.");
     } else {
-      // Remove id from formData before spreading to avoid duplicate
-      const { id: _ignored, ...rest } = formData as Job;
+      // Explicitly construct new job with all required fields
       const newJob: Job = {
         id: `PRJ-${Math.floor(Math.random() * 9000) + 1000}`,
+        name: formData.name ?? '',
+        type: formData.type ?? 'Technical Proposal',
+        stage: formData.stage ?? 'Initial Planning',
+        progress: formData.progress ?? 0,
+        status: formData.status ?? 'queued',
         eta: '10m',
+        priority: formData.priority ?? 'Normal',
+        opportunityId: formData.opportunityId,
         logs: [
           {
             timestamp: new Date().toLocaleTimeString([], { hour12: false }),
@@ -157,7 +182,11 @@ const Factory: React.FC = () => {
             type: 'info'
           }
         ],
-        ...rest
+        configuration: formData.configuration ?? {
+          model: 'Gemini-3-Pro',
+          creativity: 'Standard',
+          depth: 'Standard'
+        },
       };
       setJobs(prev => [newJob, ...prev]);
       toast.success("New proposal project started.");

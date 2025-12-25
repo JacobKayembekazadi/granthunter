@@ -67,11 +67,23 @@ const Artifacts: React.FC = () => {
     const dateStr = new Date().toISOString().split('T')[0];
 
     if (editingArtifact) {
-      setArtifacts(prev => prev.map(a => a.id === editingArtifact.id ? { 
-        ...a, 
-        ...formData, 
-        oppName: selectedOpp?.title || 'Unknown' 
-      } as Artifact : a));
+      // Explicitly construct updated artifact with all required fields
+      setArtifacts(prev => prev.map(a => {
+        if (a.id === editingArtifact.id) {
+          const updated: Artifact = {
+            id: a.id, // Preserve existing id
+            name: formData.name ?? a.name,
+            type: (formData.type ?? a.type) as 'pdf' | 'docx' | 'pptx' | 'xlsx' | 'txt',
+            status: (formData.status ?? a.status) as 'ready' | 'processing',
+            opportunityId: formData.opportunityId ?? a.opportunityId,
+            size: a.size, // Preserve existing size
+            date: a.date, // Preserve existing date
+            oppName: selectedOpp?.title || 'Unknown',
+          };
+          return updated;
+        }
+        return a;
+      }));
       toast.success("Intel metadata revised");
     } else {
       // Explicitly assign all required Artifact properties with safe fallback values
