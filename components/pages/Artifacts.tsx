@@ -74,13 +74,13 @@ const Artifacts: React.FC = () => {
       } as Artifact : a));
       toast.success("Intel metadata revised");
     } else {
-      // Exclude id and size from formData to avoid duplicates (we generate these)
-      // Ensure all required fields are present (we already checked name exists)
+      // Explicitly assign all required Artifact properties with safe fallback values
+      // No spreading of optional fields to ensure type safety
       const newArt: Artifact = {
         id: `ART-${Math.floor(Math.random() * 900) + 100}`,
-        name: formData.name,
-        type: formData.type || 'pdf',
-        status: formData.status || 'ready',
+        name: formData.name as string, // Already validated above
+        type: (formData.type || 'pdf') as 'pdf' | 'docx' | 'pptx' | 'xlsx' | 'txt',
+        status: (formData.status || 'ready') as 'ready' | 'processing',
         opportunityId: formData.opportunityId || '',
         size: `${(Math.random() * 5 + 0.1).toFixed(1)} MB`,
         date: dateStr,
