@@ -14,7 +14,7 @@ export const useGeminiLive = () => {
   // Audio Contexts
   const inputAudioContextRef = useRef<AudioContext | null>(null);
   const outputAudioContextRef = useRef<AudioContext | null>(null);
-  
+
   // Nodes & State
   const inputSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
@@ -27,7 +27,7 @@ export const useGeminiLive = () => {
   const disconnect = useCallback(async () => {
     // Stop all playing audio
     activeSourcesRef.current.forEach(source => {
-      try { source.stop(); } catch (e) {}
+      try { source.stop(); } catch (e) { }
     });
     activeSourcesRef.current.clear();
 
@@ -42,8 +42,20 @@ export const useGeminiLive = () => {
     // Stop tracks
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
-    
+
+    // Disconnect audio nodes
+    if (processorRef.current) {
+      try { processorRef.current.disconnect(); processorRef.current = null; } catch (e) { }
+    }
+    if (inputSourceRef.current) {
+      try { inputSourceRef.current.disconnect(); inputSourceRef.current = null; } catch (e) { }
+    }
+
+    // Clear session
+    sessionPromiseRef.current = null;
+
     setConnectionState(ConnectionState.DISCONNECTED);
     setVolume(0);
   }, []);
@@ -57,7 +69,7 @@ export const useGeminiLive = () => {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       const inputCtx = new AudioContextClass({ sampleRate: 16000 });
       const outputCtx = new AudioContextClass({ sampleRate: 24000 });
-      
+
       inputAudioContextRef.current = inputCtx;
       outputAudioContextRef.current = outputCtx;
 
@@ -100,46 +112,60 @@ export const useGeminiLive = () => {
           onopen: () => {
             console.log('Gemini Live Connection Opened');
             setConnectionState(ConnectionState.CONNECTED);
-            
+
             // Start Audio Streaming
             const source = inputCtx.createMediaStreamSource(stream);
             const scriptProcessor = inputCtx.createScriptProcessor(4096, 1, 1);
-            
+
             scriptProcessor.onaudioprocess = (e) => {
               if (isMuted) return; // Simple software mute
 
+              // Check if session is still active
+              if (connectionState === ConnectionState.DISCONNECTED) {
+                return; // Don't send if disconnected
+              }
+
               const inputData = e.inputBuffer.getChannelData(0);
-              
+
               // Visualizer data
               let sum = 0;
-              for(let i=0; i<inputData.length; i++) sum += inputData[i] * inputData[i];
+              for (let i = 0; i < inputData.length; i++) sum += inputData[i] * inputData[i];
               const rms = Math.sqrt(sum / inputData.length);
               setVolume(Math.min(1, rms * 10)); // Scale for visual
 
               const pcmBlob = createBlob(inputData);
-              
-              // Send to Gemini
+
+              // Send to Gemini - with error catching
               sessionPromise.then(session => {
-                session.sendRealtimeInput({ media: pcmBlob });
+                try {
+                  if (session && session.sendRealtimeInput) {
+                    session.sendRealtimeInput({ media: pcmBlob });
+                  }
+                } catch (err) {
+                  // Silently fail if websocket is closed
+                  console.debug('Failed to send audio (connection closed):', err);
+                }
+              }).catch(err => {
+                console.debug('Session promise rejected:', err);
               });
             };
 
             source.connect(scriptProcessor);
             scriptProcessor.connect(inputCtx.destination);
-            
+
             inputSourceRef.current = source;
             processorRef.current = scriptProcessor;
           },
           onmessage: async (message: LiveServerMessage) => {
             // Handle Audio Output
             const base64Audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
-            
+
             if (base64Audio && outputCtx) {
               try {
-                 // Ensure gapless playback
+                // Ensure gapless playback
                 nextStartTimeRef.current = Math.max(
-                    nextStartTimeRef.current,
-                    outputCtx.currentTime
+                  nextStartTimeRef.current,
+                  outputCtx.currentTime
                 );
 
                 const audioBuffer = await decodeAudioData(
@@ -152,7 +178,7 @@ export const useGeminiLive = () => {
                 const source = outputCtx.createBufferSource();
                 source.buffer = audioBuffer;
                 source.connect(outputGain);
-                
+
                 source.addEventListener('ended', () => {
                   activeSourcesRef.current.delete(source);
                 });
@@ -162,7 +188,7 @@ export const useGeminiLive = () => {
                 activeSourcesRef.current.add(source);
 
                 // Simulate visualizer for output
-                setVolume(0.5); 
+                setVolume(0.5);
                 setTimeout(() => setVolume(0), audioBuffer.duration * 1000);
 
               } catch (err) {
@@ -174,14 +200,14 @@ export const useGeminiLive = () => {
             if (message.serverContent?.interrupted) {
               console.log("Model interrupted");
               activeSourcesRef.current.forEach(src => {
-                try { src.stop(); } catch(e){}
+                try { src.stop(); } catch (e) { }
               });
               activeSourcesRef.current.clear();
               nextStartTimeRef.current = 0;
             }
-            
+
             if (message.serverContent?.turnComplete) {
-                // setVolume(0); // Optional reset
+              // setVolume(0); // Optional reset
             }
           },
           onclose: () => {

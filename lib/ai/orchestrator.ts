@@ -15,19 +15,30 @@ export interface GenerationOptions {
 export async function generateWithModel(options: GenerationOptions): Promise<string> {
   const { role, prompt, context, temperature = 0.7, maxTokens = 2000 } = options;
 
-  // Check rate limits
-  const rateLimitKey = `rate_limit:${role}`;
-  const rateLimitResult = await rateLimit(rateLimitKey, 100, 3600); // 100 requests per hour
-  
-  if (!rateLimitResult.allowed) {
-    throw new Error(`Rate limit exceeded for ${role}. Try again later.`);
+  // Check rate limits (optional - works without Redis)
+  try {
+    const rateLimitKey = `rate_limit:${role}`;
+    const rateLimitResult = await rateLimit(rateLimitKey, 100, 3600); // 100 requests per hour
+
+    if (!rateLimitResult.allowed) {
+      throw new Error(`Rate limit exceeded for ${role}. Try again later.`);
+    }
+  } catch (rateLimitError) {
+    console.warn('Rate limiting unavailable (Redis not configured):', rateLimitError);
+    // Continue without rate limiting
   }
 
-  // Check cache
-  const cacheKey = `ai_cache:${role}:${Buffer.from(prompt).toString('base64').slice(0, 50)}`;
-  const cached = await getCached<string>(cacheKey);
-  if (cached) {
-    return cached;
+  // Check cache (optional - works without Redis)
+  let cached: string | null = null;
+  try {
+    const cacheKey = `ai_cache:${role}:${Buffer.from(prompt).toString('base64').slice(0, 50)}`;
+    cached = await getCached<string>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+  } catch (cacheError) {
+    console.warn('Caching unavailable (Redis not configured):', cacheError);
+    // Continue without cache
   }
 
   let result: string;
@@ -37,7 +48,7 @@ export async function generateWithModel(options: GenerationOptions): Promise<str
       case 'navigator':
         // Navigator uses Gemini Live (handled separately in useGeminiLive hook)
         throw new Error('Navigator should use Gemini Live API directly');
-      
+
       case 'scout':
         // Use DeepSeek for cost efficiency, fallback to Gemini 1.5 Flash
         try {
@@ -52,7 +63,7 @@ export async function generateWithModel(options: GenerationOptions): Promise<str
           result = response.text || '';
         }
         break;
-      
+
       case 'architect':
         // Use Gemini 1.5 Pro for proposal writing
         const architectResponse = await geminiClient.models.generateContent({
@@ -62,7 +73,7 @@ export async function generateWithModel(options: GenerationOptions): Promise<str
         });
         result = architectResponse.text || '';
         break;
-      
+
       case 'editor':
         // Use Claude 3.5 Sonnet for compliance checking
         const editorResponse = await claudeClient.messages.create({
@@ -74,17 +85,22 @@ export async function generateWithModel(options: GenerationOptions): Promise<str
             { role: 'user' as const, content: prompt },
           ],
         });
-        result = editorResponse.content[0].type === 'text' 
-          ? editorResponse.content[0].text 
+        result = editorResponse.content[0].type === 'text'
+          ? editorResponse.content[0].text
           : '';
         break;
-      
+
       default:
         throw new Error(`Unknown model role: ${role}`);
     }
 
-    // Cache the result for 1 hour
-    await setCached(cacheKey, result, 3600);
+    // Cache the result for 1 hour (optional)
+    try {
+      const cacheKey = `ai_cache:${role}:${Buffer.from(prompt).toString('base64').slice(0, 50)}`;
+      await setCached(cacheKey, result, 3600);
+    } catch (cacheError) {
+      console.warn('Could not cache result:', cacheError);
+    }
 
     return result;
   } catch (error) {
